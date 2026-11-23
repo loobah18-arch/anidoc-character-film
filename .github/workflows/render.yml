@@ -1,0 +1,85 @@
+name: Render Animation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/canvas-core/problemSolution.ts'
+      - 'assets/narration/problemSolution.json'
+      - 'package.json'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright Chromium
+        run: npx playwright-core install chromium --with-deps
+      
+      - name: Generate voice narration
+        run: |
+          node tools/narrate.mjs all assets/narration/problemSolution.json
+        env:
+          # Use macOS say command on GitHub macOS runners, or edge-tts on Linux
+          NARRATE_PROVIDER: edge-tts
+      
+      - name: Type-check
+        run: npx tsc --noEmit
+      
+      - name: Lint film
+        run: node tools/gate.mjs problemSolution --self-test
+      
+      - name: Render film (draft first)
+        run: |
+          node tools/render.mjs problemSolution --draft --out out/draft.mp4 --max-min 10
+      
+      - name: Verify draft
+        run: node tools/verify-export.mjs out/draft.mp4 --delivery
+      
+      - name: Render final film
+        run: |
+          node tools/render.mjs problemSolution --out out/problemSolution.mp4 --max-min 20
+      
+      - name: Verify final export
+        run: node tools/verify-export.mjs out/problemSolution.mp4 --delivery
+      
+      - name: Generate captions
+        run: node tools/narrate.mjs captions assets/narration/problemSolution.json --out out/problemSolution.srt
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: problemSolution-animation
+          path: |
+            out/problemSolution.mp4
+            out/problemSolution.srt
+            out/qa/
+          retention-days: 30
+      
+      - name: Create release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: problemSolution-v${{ github.run_number }}
+          name: Problem→Solution Animation v${{ github.run_number }}
+          files: |
+            out/problemSolution.mp4
+            out/problemSolution.srt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

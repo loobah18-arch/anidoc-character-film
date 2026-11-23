@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "voice": "gemini",
+  "script": [
+    {
+      "id": "intro",
+      "text": "Meet Alex. Alex has a problem."
+    },
+    {
+      "id": "problem",
+      "text": "Every day, the same mountain of tasks. No time. No focus."
+    },
+    {
+      "id": "discovery",
+      "text": "Then Alex found a way. A simple system. One thing at a time."
+    },
+    {
+      "id": "solution",
+      "text": "Now the mountain becomes steps. Each step, a win. Focus returns."
+    },
+    {
+      "id": "outro",
+      "text": "Your turn. One step. Today."
+    }
+  ],
+  "fps": 30,
+  "timing": {
+    "intro": { "start": 1.0, "duration": 3.0 },
+    "problem": { "start": 5.0, "duration": 6.0 },
+    "discovery": { "start": 12.0, "duration": 6.0 },
+    "solution": { "start": 19.0, "duration": 6.0 },
+    "outro": { "start": 26.0, "duration": 4.0 }
+  }
+}
