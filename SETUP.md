@@ -14,6 +14,7 @@
 cd /data/data/com.termux/files/home/antigravity/anidoc-character-film
 git remote add origin https://github.com/loobah18-arch/anidoc-character-film.git
 git branch -M main
+# Note: repo uses master branch by default on Termux, adjust as needed
 git push -u origin main
 ```
 
